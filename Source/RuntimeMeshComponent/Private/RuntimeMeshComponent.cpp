@@ -6,6 +6,7 @@
 #include "RuntimeMeshGenericVertex.h"
 #include "RuntimeMeshVersion.h"
 #include "PhysicsEngine/PhysicsSettings.h"
+#include "Physics/IPhysXCookingModule.h"
 
 
 /** Runtime mesh scene proxy */
@@ -1777,13 +1778,11 @@ void URuntimeMeshComponent::UpdateCollision()
 	// New GUID as collision has changed
 	BodySetup->BodySetupGuid = FGuid::NewGuid();
 
-
-#if WITH_RUNTIME_PHYSICS_COOKING || WITH_EDITOR
-	// Clear current mesh data
-	BodySetup->InvalidatePhysicsData();
-	// Create new mesh data
-	BodySetup->CreatePhysicsMeshes();
-#endif // WITH_RUNTIME_PHYSICS_COOKING || WITH_EDITOR
+	if (FModuleManager::Get().IsModuleLoaded(FName("RuntimePhysXCooking")))
+	{
+		BodySetup->InvalidatePhysicsData();
+		BodySetup->CreatePhysicsMeshes();
+	}
 
 	// Recreate physics state if necessary
 	if (NeedsNewPhysicsState)
